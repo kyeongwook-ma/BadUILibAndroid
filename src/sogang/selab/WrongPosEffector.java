@@ -18,7 +18,6 @@ public class WrongPosEffector {
 		baseView.addView(v);
 		
 		baseActivity.addContentView(v, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-		
 	}
 
 

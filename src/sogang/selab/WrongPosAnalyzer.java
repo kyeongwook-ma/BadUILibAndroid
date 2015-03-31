@@ -1,25 +1,22 @@
 package sogang.selab;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import model.Point;
-import model.State;
-import model.Transition;
-import sogang.selab.db.BMDBscheme;
-import sogang.selab.db.DBHelper;
-import android.database.Cursor;
+import sogang.selab.model.Point;
+import sogang.selab.model.Transition;
 
 
-public class WrongPosDetector implements WrongPosDetectionService {
+public class WrongPosAnalyzer extends BadSymptomAnalyzeService {
+
+	public WrongPosAnalyzer(int timestamp, float x, float y, String target,
+			String operation) {
+		super(timestamp, x, y, target, operation);
+	}
 
 	@Override
-	public boolean isWrongPosition(int timeThreshold, float targetX, float targetY, String target,
-			String operation) {
-
-		Cursor c = DBHelper.getInstance().getAllColumns(BMDBscheme.TABLE_NAME);
-
-		List<Transition> bms = getAllBM(c);
+	public BadSymptom analyze() {
+		
+		List<Transition> bms = LogMonitor.getAllBM();
 
 		Point points[] = getAllPoint(bms);
 		double[] actualX = extractXPoint(points);
@@ -32,11 +29,11 @@ public class WrongPosDetector implements WrongPosDetectionService {
 
 			if(t.equals(nextTransition) || t.equals(prevTransition)) {
 				if(isDistracted(targetX, targetY, actualX, actualY))
-					return true;
+					return BadSymptom.WRONG_POS;
 			}
 		}
-
-		return false;
+		
+		return BadSymptom.WRONG_POS;
 	}
 	
 	private double[] extractXPoint(Point points[]) {
@@ -74,32 +71,7 @@ public class WrongPosDetector implements WrongPosDetectionService {
 		return points;
 	}
 
-	private List<Transition> getAllBM(Cursor c) {
 
-		ArrayList<Transition> bm = new ArrayList<Transition>();
-
-		while(c.moveToNext()) {
-			int currState = c.getInt(c.getColumnIndex(BMDBscheme.COLUMN_ID));
-			
-			double x = c.getDouble(c.getColumnIndex(BMDBscheme.COLUMN_X));
-			double y = c.getDouble(c.getColumnIndex(BMDBscheme.COLUMN_Y));
-			
-			Point p = new Point(x, y);
-			
-			Transition transition = 
-					new Transition.TransitionBuilder(
-							State.newInstance(currState), State.newInstance(currState+1))
-			.point(p)
-			.target(c.getString(c.getColumnIndex(BMDBscheme.COLUMN_CLASS)))
-			.timestamp(c.getDouble(c.getColumnIndex(BMDBscheme.COLUMN_TIMESTAMP)))
-			.event(c.getString(c.getColumnIndex(BMDBscheme.COLUMN_MODE)))
-			.createTransition();
-
-			bm.add(transition);
-		}
-
-		return bm;
-	}
 
 	private boolean isDistracted(double targetX, double targetY, double actualX[], double actualY[]) {
 

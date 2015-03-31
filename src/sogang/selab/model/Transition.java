@@ -72,7 +72,7 @@ public class Transition {
 		this.targets = new HashSet<String>();
 	}
 
-
+	
 
 	/**
 	 * @author se

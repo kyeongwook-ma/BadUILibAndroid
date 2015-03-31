@@ -3,7 +3,7 @@ package sogang.selab;
 public abstract class BadSymptomAnalyzeService {
 	
 	protected int timestamp;
-	protected float targetX, targetY;
+	protected float targetX, targetY, screenX, screenY;
 	protected String target, operation;
 	
 	/**
@@ -14,9 +14,12 @@ public abstract class BadSymptomAnalyzeService {
 	 * @param target
 	 * @param operation
 	 */
-	public BadSymptomAnalyzeService(int timestamp, float x, float y, String target, String operation) {
+	public BadSymptomAnalyzeService(int timestamp, float x, float y, 
+			float screenX, float screenY,
+			String target, String operation) {
 		this.timestamp = timestamp;
 		this.targetX = x; this.targetY = y;
+		this.screenX = screenX; this.screenY = screenY;
 		this.target = target; this.operation = operation;
 	}
 	

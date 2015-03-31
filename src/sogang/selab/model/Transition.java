@@ -16,7 +16,6 @@ public class Transition {
 	private Point touchPoint;
 	private HashSet<String> targets;
 
-
 	public void setSrc(State src) {
 		this.src = src;
 	}
@@ -72,8 +71,6 @@ public class Transition {
 		this.targets = new HashSet<String>();
 	}
 
-	
-
 	/**
 	 * @author se
 	 * Trnasition�� builder Ŭ����
@@ -94,10 +91,8 @@ public class Transition {
 		private HashSet<String> targets;
 
 		public TransitionBuilder(State src, State dst) {
-
 			this.src = src;
 			this.dst = dst;
-
 			targets = new HashSet<String>();
 		}
 

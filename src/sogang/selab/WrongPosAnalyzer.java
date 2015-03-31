@@ -1,5 +1,6 @@
 package sogang.selab;
 
+import java.util.Arrays;
 import java.util.List;
 
 import sogang.selab.model.Point;
@@ -8,9 +9,12 @@ import sogang.selab.model.Transition;
 
 public class WrongPosAnalyzer extends BadSymptomAnalyzeService {
 
-	public WrongPosAnalyzer(int timestamp, float x, float y, String target,
+	public WrongPosAnalyzer(int timestamp, 
+			float x, float y, 
+			float screenX, float screenY, 
+			String target,
 			String operation) {
-		super(timestamp, x, y, target, operation);
+		super(timestamp, x, y, screenX, screenY, target, operation);
 	}
 
 	@Override
@@ -28,7 +32,7 @@ public class WrongPosAnalyzer extends BadSymptomAnalyzeService {
 			Transition nextTransition = bms.get(i + 1);
 
 			if(t.equals(nextTransition) || t.equals(prevTransition)) {
-				if(isDistracted(targetX, targetY, actualX, actualY))
+				if(isDistracted(screenX, screenY, actualX, actualY))
 					return BadSymptom.WRONG_POS;
 			}
 		}
@@ -73,7 +77,7 @@ public class WrongPosAnalyzer extends BadSymptomAnalyzeService {
 
 
 
-	private boolean isDistracted(double targetX, double targetY, double actualX[], double actualY[]) {
+	private boolean isDistracted(double screenX, double screenY, double actualX[], double actualY[]) {
 
 		boolean isXTargeted = false, isYTargetd = false;
 
@@ -84,8 +88,11 @@ public class WrongPosAnalyzer extends BadSymptomAnalyzeService {
 	}
 
 	private boolean checkTargeted(double target, double range[]) {
-		double firstVal = range[0];
-		double lastVal = range[range.length-1];
+		
+		double sorted[] = range.clone();
+		Arrays.sort(sorted);
+		double firstVal = sorted[0];
+		double lastVal = sorted[sorted.length - 1];
 
 		if(firstVal <= target && target <= lastVal) {
 			return true;

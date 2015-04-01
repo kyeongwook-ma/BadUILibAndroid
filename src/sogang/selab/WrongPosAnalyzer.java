@@ -2,6 +2,7 @@ package sogang.selab;
 
 import java.util.List;
 
+import android.text.InputFilter.LengthFilter;
 import sogang.selab.model.Point;
 import sogang.selab.model.Transition;
 
@@ -88,9 +89,16 @@ public class WrongPosAnalyzer extends BadSymptomAnalyzeService {
 	private boolean checkOutofScreen(double screenSize, double range[]) {
 		
 		double actualSum = 0.0;
-		
-		for(double d : range) {
-			actualSum += d;
+	
+		for(int i = 0; i < range.length; ++i) {
+			
+			double gap = 0.0;
+			if(i < range.length - 1) {
+				gap = Math.abs(range[i] - range[i+1]);
+			} else {
+				gap = range[i];
+			}
+			actualSum += gap;
 		}
 		
 		return actualSum > screenSize ? true : false;

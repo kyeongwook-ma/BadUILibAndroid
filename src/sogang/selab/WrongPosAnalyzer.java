@@ -1,11 +1,9 @@
 package sogang.selab;
 
-import java.util.Arrays;
 import java.util.List;
 
 import sogang.selab.model.Point;
 import sogang.selab.model.Transition;
-
 
 public class WrongPosAnalyzer extends BadSymptomAnalyzeService {
 
@@ -88,16 +86,14 @@ public class WrongPosAnalyzer extends BadSymptomAnalyzeService {
 	}
 
 	private boolean checkOutofScreen(double screenSize, double range[]) {
-
-		double sorted[] = range.clone();
-		Arrays.sort(sorted);
-
-		for(int i = range.length; i > 0; --i) {
-			if(sorted[i] > screenSize) {
-				return true;
-			}
+		
+		double actualSum = 0.0;
+		
+		for(double d : range) {
+			actualSum += d;
 		}
-		return false;
+		
+		return actualSum > screenSize ? true : false;
 	}
 
 }

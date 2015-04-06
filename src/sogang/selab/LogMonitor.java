@@ -1,6 +1,7 @@
 package sogang.selab;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import sogang.selab.db.BMDBscheme;
@@ -12,7 +13,7 @@ import android.database.Cursor;
 
 public class LogMonitor {
 
-	public static List<Transition> getAllBM() {
+	public static List<Transition> getAllTransition() {
 		Cursor c = DBHelper.getInstance().getAllColumns(BMDBscheme.TABLE_NAME);
 
 		ArrayList<Transition> bm = new ArrayList<Transition>();
@@ -65,5 +66,34 @@ public class LogMonitor {
 			return transition;
 		}
 	}
+	
+	public static void calculateRatio() {
 
+		HashMap<Transition, Double> transitionRatio
+		= new HashMap<Transition, Double>();
+		
+		List<Transition> allTransitions = getAllTransition();
+		int transitionSize = allTransitions.size();
+				
+		for(Transition t : allTransitions) {
+
+			if(transitionRatio.containsKey(t)) {	
+				double preRatio = transitionRatio.get(t);
+				double currRatio = getCurrRatio(preRatio, transitionSize);
+				transitionRatio.put(t, currRatio);
+				
+			} else {
+				transitionRatio.put(t, getRatio(transitionSize));	
+			}
+		}
+	}
+	
+	private static double getRatio(int transitionSize) {
+		return ((double)1 / transitionSize  * 100);
+	}
+	
+	private static double getCurrRatio(double preRatio, int transitionSize) {
+		int incrementedCount = (int) (preRatio * transitionSize / 100 ) + 1;
+		return  (double)incrementedCount / (double)transitionSize * 100;
+	}
 }

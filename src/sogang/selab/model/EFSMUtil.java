@@ -44,7 +44,6 @@ public class EFSMUtil {
 		return mergedEFSM;
 	}
 	
-
 	private static int minSize(EFSM src, EFSM dst) {
 		return src.size() > dst.size() ? dst.size() : src.size();
 	}

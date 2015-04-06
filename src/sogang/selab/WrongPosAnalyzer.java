@@ -2,7 +2,6 @@ package sogang.selab;
 
 import java.util.List;
 
-import android.text.InputFilter.LengthFilter;
 import sogang.selab.model.Point;
 import sogang.selab.model.Transition;
 
@@ -19,12 +18,14 @@ public class WrongPosAnalyzer extends BadSymptomAnalyzeService {
 	@Override
 	public BadSymptom analyze() {
 
-		List<Transition> bms = LogMonitor.getAllBM();
+		List<Transition> bms = LogMonitor.getAllTransition();
 
 		Point points[] = getAllPoint(bms);
 		double[] actualX = extractXPoint(points);
 		double[] actualY = extractYPoint(points);
 
+		
+		
 		for(int i = 1; i < bms.size(); i += 3) {
 			Transition t = bms.get(i);
 			Transition prevTransition = bms.get(i - 1);

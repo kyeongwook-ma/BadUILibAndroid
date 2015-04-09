@@ -15,11 +15,11 @@ public class EFSMUtil {
 	 * @param dst
 	 * @throws Exception 
 	 */
-	private static EFSM gkTail(EFSM src, EFSM dst, int k) throws Exception {
+	public static AFSM gkTail(AFSM src, AFSM dst, int k) throws Exception {
 
 		if(src == null || dst == null) throw new Exception();
 
-		EFSM mergedEFSM = new EFSM();
+		AFSM mergedEFSM = new AFSM();
 
 		int range = minSize(src, dst) + 1;
 
@@ -44,7 +44,7 @@ public class EFSMUtil {
 		return mergedEFSM;
 	}
 	
-	private static int minSize(EFSM src, EFSM dst) {
+	private static int minSize(AFSM src, AFSM dst) {
 		return src.size() > dst.size() ? dst.size() : src.size();
 	}
 

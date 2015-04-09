@@ -1,14 +1,25 @@
 package sogang.selab.model;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-public class EFSM {
+public class AFSM {
+
+	private int userId;
+	
+	public int getUserId() {
+		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
 
 	private LinkedList<Transition> transitionSeqs;
 
-	public EFSM() {
+	public AFSM() {
 		transitionSeqs = new LinkedList<Transition>();
 	}
 	
@@ -68,11 +79,15 @@ public class EFSM {
 		return transitionSeqs.getLast();
 	}
 	
-	@Override
-	public boolean equals(Object obj) {
-		EFSM efsm = (EFSM) obj;
-		
-		return super.equals(obj);
+	public boolean containsOf(Object obj) {
+		AFSM efsm = (AFSM) obj;
+		return transitionSeqs.contains(efsm.getAllTransition());
+	}
+	
+	public List<Transition> getDiffTransition(AFSM userBM) {
+		ArrayList<Transition> diffTransitions = new ArrayList<Transition>(transitionSeqs);
+		diffTransitions.removeAll(userBM.getAllTransition());		
+		return diffTransitions;
 	}
 	
 	@Override

@@ -2,13 +2,13 @@ package sogang.selab.model;
 
 public class User  {
 	private int id;
-	private EFSM behaviorModel;
+	private AFSM behaviorModel;
 	private int timestamp;
 	
 	public User(int id, int timestamp) {
 		this.id = id;
 		this.timestamp = timestamp;
-		this.behaviorModel = new EFSM();
+		this.behaviorModel = new AFSM();
 	}
 	
 	public void addBehavior(Transition t) {
@@ -21,10 +21,10 @@ public class User  {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public EFSM getBehaviorModel() {
+	public AFSM getBehaviorModel() {
 		return behaviorModel;
 	}
-	public void setBehaviorModel(EFSM behaviorModel) {
+	public void setBehaviorModel(AFSM behaviorModel) {
 		this.behaviorModel = behaviorModel;
 	}
 	public int getTimestamp() {

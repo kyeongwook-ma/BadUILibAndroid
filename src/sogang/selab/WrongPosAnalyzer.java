@@ -1,12 +1,18 @@
 package sogang.selab;
 
+import java.util.HashMap;
 import java.util.List;
 
+import android.util.Log;
+import sogang.selab.model.AFSM;
+import sogang.selab.model.EFSMUtil;
 import sogang.selab.model.Point;
 import sogang.selab.model.Transition;
 
 public class WrongPosAnalyzer extends BadSymptomAnalyzeService {
 
+	private final double THRESHOLD = 65.0;
+	
 	public WrongPosAnalyzer(int timestamp, 
 			float x, float y, 
 			float screenX, float screenY, 
@@ -15,94 +21,88 @@ public class WrongPosAnalyzer extends BadSymptomAnalyzeService {
 		super(timestamp, x, y, screenX, screenY, target, operation);
 	}
 
+	private HashMap<Transition, Double> calculatedRatioMap() {
+		
+		List<Transition> allTransitions = LogMonitor.getAllTransition();
+
+		HashMap<Transition, Double> transitionRatioMap
+		= new HashMap<Transition, Double>();
+
+		int transitionSize = allTransitions.size();
+
+		for(Transition t : allTransitions) {
+
+			if(transitionRatioMap.containsKey(t)) {	
+				double preRatio = transitionRatioMap.get(t);
+				double currRatio = getCurrRatio(preRatio, transitionSize);
+				transitionRatioMap.put(t, currRatio);
+
+			} else {
+				transitionRatioMap.put(t, getRatio(transitionSize));	
+			}
+		}
+
+		return transitionRatioMap;
+	}
+
+	private double getRatio(int transitionSize) {
+		return ((double)1 / transitionSize  * 100);
+	}
+
+	private double getCurrRatio(double preRatio, int transitionSize) {
+		int incrementedCount = (int) (preRatio * transitionSize / 100 ) + 1;
+		return  (double)incrementedCount / (double)transitionSize * 100;
+	}
+	
+	private AFSM generateWholeBM() throws Exception {
+		AFSM wholeBM = null;
+
+		List<AFSM> allBMs = LogMonitor.getAllBMs();
+		int bmSize = allBMs.size();
+		
+		for(int i = 0; i < bmSize - 1; ++i) {
+			wholeBM = EFSMUtil.gkTail(allBMs.get(i), allBMs.get(i+1), 3);
+		}
+	
+		return EFSMUtil.gkTail(wholeBM, allBMs.get(bmSize), 3);
+	}
+
+	
 	@Override
 	public BadSymptom analyze() {
 
-		List<Transition> bms = LogMonitor.getAllTransition();
+		/* 모든 상태 전이의 분포 계산 */
+		HashMap<Transition, Double> transitionRatioMap = calculatedRatioMap();
 
-		Point points[] = getAllPoint(bms);
-		double[] actualX = extractXPoint(points);
-		double[] actualY = extractYPoint(points);
-
-		
-		
-		for(int i = 1; i < bms.size(); i += 3) {
-			Transition t = bms.get(i);
-			Transition prevTransition = bms.get(i - 1);
-			Transition nextTransition = bms.get(i + 1);
-
-			if(t.equals(nextTransition) || t.equals(prevTransition)) {
-				if(isDistracted(screenX, screenY, actualX, actualY))
-					return BadSymptom.WRONG_POS;
-			}
-		}
-
-		return BadSymptom.WRONG_POS;
-	}
-
-	private double[] extractXPoint(Point points[]) {
-
-		double x[] = new double[points.length];
-
-		for(int i = 0; i < points.length; ++i) {
-			x[i] = points[i].getX();
-		}
-
-		return x;
-	}
-
-	private double[] extractYPoint(Point points[]) {
-
-		double y[] = new double[points.length];
-
-		for(int i = 0; i < points.length; ++i) {
-			y[i] = points[i].getY();
-		}
-
-		return y;
-	}
-
-	private Point[] getAllPoint(List<Transition> bms) {
-
-		int bmsSize = bms.size();
-
-		Point points[] = new Point[bms.size()];
-
-		for(int i = 0; i < bmsSize; ++i) {
-			points[i] = bms.get(i).getTouchPoint();
-		}
-
-		return points;
-	}
-
-
-
-	private boolean isDistracted(double screenX, double screenY, double actualX[], double actualY[]) {
-
-		boolean isXTargeted = false, isYTargeted = false;
-
-		isXTargeted = checkOutofScreen(screenX, actualX);
-		isYTargeted = checkOutofScreen(screenY, actualY);
-
-		return isXTargeted || isYTargeted;
-	}
-
-	private boolean checkOutofScreen(double screenSize, double range[]) {
-		
-		double actualSum = 0.0;
-	
-		for(int i = 0; i < range.length; ++i) {
+		/* 사용자 전체의 AFSM */
+		try {
+			/* 병합된 형태의 BM */
+			AFSM wholeBM = generateWholeBM();
 			
-			double gap = 0.0;
-			if(i < range.length - 1) {
-				gap = Math.abs(range[i] - range[i+1]);
-			} else {
-				gap = range[i];
+			int userId = 3;
+			AFSM userBM = LogMonitor.getUserBM(userId);
+			
+			/* 전체 사용자 BM - 현 사용자 BM */
+			List<Transition> diffTransitions = wholeBM.getDiffTransition(userBM);
+			
+			for(Transition t : diffTransitions) {
+				double ratio = transitionRatioMap.get(t);
+				
+				/* 다른 Transition 비율이 일정 THRESHOLD로 넘어가거나
+				 * 일정 시간을 지나치면 
+				 * WRONG POS 진단 */
+				if(ratio > THRESHOLD || t.getTimestamp() > timestamp) {
+					return BadSymptom.WRONG_POS;
+				}
 			}
-			actualSum += gap;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
-		return actualSum > screenSize ? true : false;
+		return null;
 	}
+
+	
 
 }
